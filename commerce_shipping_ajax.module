@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * Contains commerce_shipping_ajax.module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function commerce_shipping_ajax_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the commerce_shipping_ajax module.
+    case 'help.page.commerce_shipping_ajax':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides additional AJAX support for Commerce Shipping 2.x') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function commerce_shipping_ajax_theme_registry_alter(&$theme_registry) {
+  $templates = [
+    'commerce_checkout_form',
+    'commerce_checkout_form__with_sidebar'
+  ];
+
+  foreach ($templates as $template) {
+    if (isset($theme_registry[$template])) {
+      $theme_registry[$template]['path'] = drupal_get_path('module', 'commerce_shipping_ajax') . '/templates';
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function commerce_shipping_ajax_form_commerce_checkout_flow_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['#prefix'] = '<div id="commerce-checkout-flow-wrapper">';
+  $form['#suffix'] = '</div>';
+
+  if (isset($form['shipping_information'])) {
+    $form['#attached']['library'][] = 'commerce_shipping_ajax/shipping-form';
+  }
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function commerce_shipping_ajax_field_widget_form_alter(&$element, \Drupal\Core\Form\FormStateInterface $form_state, $context) {
+  if (isset($element['#entity_type']) && $element['#entity_type'] == 'commerce_shipment') {
+    $element['#ajax'] = [
+      'callback' => 'Drupal\commerce_shipping_ajax\CommerceShippingAjax::elementCallback',
+      'wrapper' => 'commerce-checkout-flow-wrapper',
+      'progress' => [
+        'type' => 'throbber',
+      ],
+    ];
+
+    $element['#element_validate'][] = 'Drupal\commerce_shipping_ajax\CommerceShippingAjax::elementValidate';
+  }
+}

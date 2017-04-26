@@ -1,0 +1,7 @@
+shipping-form:
+  version: VERSION
+  js:
+    js/shipping-form.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal.ajax
