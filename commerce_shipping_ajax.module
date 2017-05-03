@@ -35,7 +35,9 @@ function commerce_shipping_ajax_theme_registry_alter(&$theme_registry) {
 
   foreach ($templates as $template) {
     if (isset($theme_registry[$template])) {
-      $theme_registry[$template]['path'] = drupal_get_path('module', 'commerce_shipping_ajax') . '/templates';
+      if ($theme_registry[$template]['path'] == drupal_get_path('module', 'commerce_checkout') . '/templates') {
+        $theme_registry[$template]['path'] = drupal_get_path('module', 'commerce_shipping_ajax') . '/templates';
+      }
     }
   }
 }
